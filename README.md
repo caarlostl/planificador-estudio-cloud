@@ -1,5 +1,11 @@
 # **Planificador de estudio en la nube**
 
+## Estrategia de ramas y commits
+
+El repositorio utilizará `main` como rama principal, que contendrá la versión estable del proyecto. Para desarrollar nuevas funcionalidades o realizar cambios, se crearán ramas independientes a partir de `main`, siguiendo una estrategia basada en *feature branches*. Una vez finalizados los cambios, se integrarán en `main` mediante un Pull Request.
+
+Los commits seguirán una convención semántica para identificar el tipo de cambio realizado, utilizando prefijos como `feat:` para nuevas funcionalidades, `fix:` para correcciones, `docs:` para cambios en la documentación y `refactor:` para reorganizaciones del código.
+
 ## **1. Descripción del dominio**
 
 La idea de este proyecto es crear una aplicación web que ayude a los estudiantes a organizar mejor su tiempo de estudio. Muchas veces, al tener varias asignaturas y trabajos pendientes, resulta complicado decidir por qué tarea empezar y cuánto tiempo dedicar a cada una. Por eso, la aplicación permitirá organizar las asignaturas y sus tareas teniendo en cuenta aspectos como la fecha de entrega, la dificultad, la importancia y el tiempo que se calcula que llevará realizarlas.
