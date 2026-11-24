@@ -3,3 +3,4 @@ uvicorn[standard]
 sqlalchemy>=2.0,<3.0
 psycopg[binary]>=3.2,<4.0
 python-dotenv
+PyJWT>=2.10,<3.0

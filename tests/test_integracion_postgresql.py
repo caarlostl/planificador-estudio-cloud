@@ -1,19 +1,21 @@
+
 from asignaturas_tareas.app import models
 
 
 def test_persistencia_asignatura_postgresql(
     asignaturas_client,
-    postgres_db_session
+    postgres_db_session,
+    auth_headers,
 ):
     datos = {
         "nombre": "Cloud Computing",
         "descripcion": "Prueba de integración con PostgreSQL",
-        "estudiante_id": 100
     }
 
     respuesta = asignaturas_client.post(
         "/asignaturas",
-        json=datos
+        json=datos,
+        headers=auth_headers(100),
     )
 
     assert respuesta.status_code == 200
@@ -34,18 +36,21 @@ def test_persistencia_asignatura_postgresql(
 
 def test_persistencia_tarea_postgresql(
     asignaturas_client,
-    postgres_db_session
+    postgres_db_session,
+    auth_headers,
 ):
     asignatura = {
         "nombre": "Bases de datos",
         "descripcion": "",
-        "estudiante_id": 200
     }
 
     respuesta_asignatura = asignaturas_client.post(
         "/asignaturas",
-        json=asignatura
+        json=asignatura,
+        headers=auth_headers(200),
     )
+
+    assert respuesta_asignatura.status_code == 200
 
     asignatura_id = respuesta_asignatura.json()["id"]
 
@@ -56,11 +61,14 @@ def test_persistencia_tarea_postgresql(
         "importancia": 5,
         "dificultad": 3,
         "duracion_estimada": 4,
-        "estudiante_id": 200,
-        "asignatura_id": asignatura_id
+        "asignatura_id": asignatura_id,
     }
 
-    respuesta = asignaturas_client.post("/tareas", json=tarea)
+    respuesta = asignaturas_client.post(
+        "/tareas",
+        json=tarea,
+        headers=auth_headers(200),
+    )
 
     assert respuesta.status_code == 200
 
