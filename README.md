@@ -146,3 +146,57 @@ Para registrar una tarea, se enviará una petición `POST /tareas` con los datos
 ```
 
 Al iniciar sesión, el microservicio de usuarios devolverá un token de acceso que permitirá a los demás microservicios identificar al estudiante y garantizar que cada usuario solo pueda acceder a sus propias tareas y planificaciones.
+
+## **7. Empaquetado Cloud Native, entorno local e integración continua**
+
+En el hito 2, se han preparado los tres microservicios para ejecutarse mediante contenedores Docker. También se ha configurado un entorno local con Docker Compose y un flujo de integración continua mediante GitHub Actions.
+
+### **7.1. Contenerización de los microservicios**
+
+Se ha creado un `Dockerfile` para cada uno de los tres microservicios: usuarios, asignaturas y tareas, y planificación.
+
+Los Dockerfiles utilizan construcción multietapa (*multi-stage builds*), separando la instalación de dependencias de la ejecución de la aplicación. Se han utilizado imágenes base ligeras de Python para reducir el tamaño de las imágenes y se ha configurado la ejecución mediante un usuario no privilegiado.
+
+También se ha organizado la instalación de dependencias para aprovechar la caché de Docker y se han expuesto los puertos correspondientes a cada servicio.
+
+### **7.2. Orquestación con Docker Compose**
+
+Se ha creado el archivo `compose.yaml` para levantar todo el entorno local mediante un único comando. La configuración incluye cuatro contenedores: los tres microservicios y una instancia de PostgreSQL.
+
+Cada microservicio utiliza su propia base de datos dentro de PostgreSQL, evitando mezclar la información de los distintos componentes. Para mantener los datos al reiniciar los contenedores, se ha configurado un volumen persistente.
+
+También se han definido dos redes internas:
+- `microservices`: permite la comunicación entre los microservicios.
+- `database`: permite que los microservicios accedan a PostgreSQL.
+
+La base de datos solo está conectada a la red `database`, mientras que los microservicios participan en ambas redes para poder comunicarse entre sí y acceder al almacenamiento.
+
+Las variables de entorno se gestionan mediante un archivo `.env`, cuyo formato se recoge en `.env.example`. De esta forma, no es necesario incluir las credenciales reales en el repositorio.
+
+Para iniciar el entorno completo se utiliza:
+
+```bash
+docker compose up -d --build
+```
+
+### **7.3. Integración continua con GitHub Actions**
+
+Se ha configurado un flujo de trabajo en `.github/workflows/ci.yml` que se ejecuta cuando se realiza un `push` o se abre una `pull_request` hacia la rama `main`.
+
+El proceso realiza las siguientes comprobaciones:
+
+- Instala las dependencias de los tres microservicios y las herramientas de desarrollo.
+- Ejecuta Ruff para comprobar la calidad del código.
+- Ejecuta las pruebas unitarias y de integración mediante Pytest, incluyendo las pruebas de persistencia con PostgreSQL.
+- Comprueba los Dockerfiles mediante Hadolint.
+- Construye las tres imágenes Docker para verificar que pueden generarse correctamente.
+
+Además, cuando los cambios se integran mediante un `push` en `main`, se construyen y publican automáticamente las imágenes en GitHub Container Registry (GHCR). Cada imagen se publica con dos etiquetas: el hash del commit y `latest`, lo que permite identificar la versión concreta y disponer de una referencia a la última imagen publicada.
+
+### **7.4. Seguridad y autenticación**
+
+Se ha incorporado autenticación mediante tokens JWT. El microservicio de usuarios genera un token al iniciar sesión, que los demás microservicios utilizan para identificar al estudiante que realiza cada petición.
+
+Las operaciones protegidas comprueban el token recibido y utilizan el identificador del estudiante para limitar el acceso a sus propios datos. De esta forma, no se depende de un identificador enviado directamente en el cuerpo de la petición.
+
+También se almacenan las contraseñas mediante hash con Argon2, evitando guardar las contraseñas originales en la base de datos.
