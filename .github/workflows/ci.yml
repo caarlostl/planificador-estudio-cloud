@@ -33,6 +33,7 @@ jobs:
     env:
       ASIGNATURAS_DATABASE_URL: postgresql+psycopg://planner_user:planner_password@localhost:5432/asignaturas_test
       TEST_ASIGNATURAS_DATABASE_URL: postgresql+psycopg://planner_user:planner_password@localhost:5432/asignaturas_test
+      JWT_SECRET_KEY: clave_secreta_exclusiva_para_pruebas_ci
 
     steps:
       - name: Checkout repository
