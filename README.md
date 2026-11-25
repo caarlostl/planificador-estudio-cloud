@@ -171,7 +171,9 @@ También se han definido dos redes internas:
 
 La base de datos solo está conectada a la red `database`, mientras que los microservicios participan en ambas redes para poder comunicarse entre sí y acceder al almacenamiento.
 
-Las variables de entorno se gestionan mediante un archivo `.env`, cuyo formato se recoge en `.env.example`. De esta forma, no es necesario incluir las credenciales reales en el repositorio.
+Las variables de entorno se gestionan mediante un archivo `.env`, cuyo formato se recoge en `.env.example`. 
+
+En `.env`, se deben configurar las credenciales de PostgreSQL (`POSTGRES_USER` y `POSTGRES_PASSWORD`), asignando el nombre de usuario y la contraseña que se deseen. Estos mismos valores deben utilizarse en las correspondientes partes de las URL de conexión definidas en `.env`. También se debe configurar la clave secreta para la autenticación JWT (`JWT_SECRET_KEY`). Esta última puede ser cualquier cadena de texto, aunque se recomienda generar una clave aleatoria para mejorar la seguridad.
 
 Para iniciar el entorno completo se utiliza:
 
@@ -200,3 +202,7 @@ Se ha incorporado autenticación mediante tokens JWT. El microservicio de usuari
 Las operaciones protegidas comprueban el token recibido y utilizan el identificador del estudiante para limitar el acceso a sus propios datos. De esta forma, no se depende de un identificador enviado directamente en el cuerpo de la petición.
 
 También se almacenan las contraseñas mediante hash con Argon2, evitando guardar las contraseñas originales en la base de datos.
+
+Para probar las operaciones protegidas, primero es necesario registrar un usuario e iniciar sesión mediante los endpoints correspondientes del microservicio de usuarios, disponible en `http://localhost:8000/docs`. Al iniciar sesión correctamente, se obtiene un token JWT que deberá utilizarse para autenticar las peticiones a los endpoints que lo requieran de los otros microservicios.
+
+Para ello, al acceder a la documentación Swagger de asignaturas y tareas (`http://localhost:8001/docs`) o de planificación (`http://localhost:8002/docs`), hay que pulsar el botón `Authorize` e introducir el token obtenido durante el inicio de sesión. Una vez autorizado, Swagger incluirá automáticamente el token en las peticiones protegidas de ese microservicio, sin necesidad de introducirlo en cada operación.
